@@ -1,5 +1,6 @@
--- You can add your own plugins here or in other files in this directory!
---  I promise not to create any merge conflicts in this directory :)
---
--- See the kickstart.nvim README for more information
+-- Sourceing helpers
+vim.keymap.set('n', '<leader>xf', '<cmd>source %<CR>', { desc = 'Source [F]ile' })
+vim.keymap.set('n', '<leader>xx', ':.lua<CR>', { desc = 'Source current line' })
+vim.keymap.set('v', '<leader>x', ':lua<CR>', { desc = 'Source lines' })
+
 return {}

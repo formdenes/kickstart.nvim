@@ -173,11 +173,6 @@ vim.o.confirm = true
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
--- Sourceing helpers
-vim.keymap.set('n', '<leader>xf', '<cmd>source %<CR>', { desc = 'Source [F]ile' })
-vim.keymap.set('n', '<leader>xx', ':.lua<CR>', { desc = 'Source current line' })
-vim.keymap.set('v', '<leader>x', ':lua<CR>', { desc = 'Source lines' })
-
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -356,6 +351,7 @@ require('lazy').setup({
         { '<leader>s', group = '[S]earch' },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>x', group = 'Source' },
       },
     },
   },
