@@ -61,3 +61,5 @@ end
 -- Default behavior (80% size, centered)
 vim.api.nvim_create_user_command('Floaterminal', toggle_terminal, {})
 vim.keymap.set({ 'n', 't' }, '<leader>tt', toggle_terminal, { desc = '[T]oggle Floa[T]erminal' })
+
+return {}
