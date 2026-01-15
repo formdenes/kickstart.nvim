@@ -889,7 +889,7 @@ require('lazy').setup({
       signature = { enabled = true },
     },
   },
-
+  -- Theme
   {
     'catppuccin/nvim',
     name = 'catppuccin',
