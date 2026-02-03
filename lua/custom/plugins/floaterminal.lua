@@ -1,4 +1,3 @@
-vim.keymap.set('t', '<esc><esc>', '<c-\\><c-n>')
 local state = {
   floating = {
     buf = -1,
@@ -58,8 +57,18 @@ local toggle_terminal = function()
   end
 end
 
+local close_terminal = function()
+  vim.api.nvim_win_hide(state.floating.win)
+end
+
 -- Default behavior (80% size, centered)
 vim.api.nvim_create_user_command('Floaterminal', toggle_terminal, {})
 vim.keymap.set({ 'n', 't' }, '<leader>tt', toggle_terminal, { desc = '[T]oggle Floa[T]erminal' })
+
+-- Clear highlights on search when pressing <Esc> in normal mode
+--  See `:help hlsearch`
+vim.keymap.set('n', '<Esc>', function()
+  return vim.api.nvim_get_current_buf() == state.floating.buf and close_terminal() or vim.cmd.nohlsearch()
+end)
 
 return {}
