@@ -46,24 +46,99 @@ local function open_floating_window(opts)
   return { buf = buf, win = win }
 end
 
+local open_terminal = function()
+  state.floating = open_floating_window { buf = state.floating.buf }
+  if vim.bo[state.floating.buf].buftype ~= 'terminal' then
+    vim.cmd.term()
+  end
+end
+
 local toggle_terminal = function()
   if not vim.api.nvim_win_is_valid(state.floating.win) then
-    state.floating = open_floating_window { buf = state.floating.buf }
-    if vim.bo[state.floating.buf].buftype ~= 'terminal' then
-      vim.cmd.term()
-    end
+    open_terminal()
   else
     vim.api.nvim_win_hide(state.floating.win)
   end
+end
+
+local change_or_open_terminal = function(bufnr)
+  if vim.api.nvim_win_is_valid(state.floating.win) then
+    vim.api.nvim_win_hide(state.floating.win)
+  end
+  state.floating.buf = bufnr
+  open_terminal()
 end
 
 local close_terminal = function()
   vim.api.nvim_win_hide(state.floating.win)
 end
 
+local open_telescope_floaterminal_picker = function(opts)
+  local pickers = require 'telescope.pickers'
+  local finders = require 'telescope.finders'
+  local conf = require('telescope.config').values
+  local actions = require 'telescope.actions'
+  local action_state = require 'telescope.actions.state'
+  local make_entry = require 'telescope.make_entry'
+  local api = vim.api
+  opts = opts or {}
+
+  local bufnrs = vim.tbl_filter(function(bufnr)
+    local bufname = api.nvim_buf_get_name(bufnr)
+    local is_term = string.find(bufname, 'term://') == 1
+    if is_term then
+      return true
+    end
+    return false
+  end, api.nvim_list_bufs())
+
+  local buffers = {}
+  for _, bufnr in ipairs(bufnrs) do
+    local flag = bufnr == state.floating.buf and '' or ' '
+    local element = {
+      bufnr = bufnr,
+      flag = flag,
+      info = vim.fn.getbufinfo(bufnr)[1],
+    }
+
+    table.insert(buffers, element)
+  end
+
+  if not opts.bufnr_width then
+    local max_bufnr = math.max(unpack(bufnrs))
+    opts.bufnr_width = #tostring(max_bufnr)
+  end
+
+  pickers
+    .new(opts, {
+      prompt_title = 'Floaterminal Picker',
+      finder = finders.new_table {
+        results = buffers,
+        entry_maker = opts.entry_maker or make_entry.gen_from_buffer(opts),
+      },
+      previewer = conf.grep_previewer(opts),
+      sorter = conf.generic_sorter(opts),
+      attach_mappings = function(prompt_bufnr, map)
+        actions.select_default:replace(function()
+          actions.close(prompt_bufnr)
+          change_or_open_terminal(action_state.get_selected_entry().bufnr)
+        end)
+        map({ 'i', 'n' }, '<M-d>', actions.delete_buffer)
+        return true
+      end,
+    })
+    :find()
+end
+
 -- Default behavior (80% size, centered)
-vim.api.nvim_create_user_command('Floaterminal', toggle_terminal, {})
+vim.api.nvim_create_user_command('FloaterminalToggle', toggle_terminal, {})
 vim.keymap.set({ 'n', 't' }, '<leader>tt', toggle_terminal, { desc = '[T]oggle Floa[T]erminal' })
+
+-- Telescope Floaterminal picker
+vim.api.nvim_create_user_command('FloaterminalTelescope', open_telescope_floaterminal_picker, {})
+vim.keymap.set({ 'n', 't' }, '<leader>st', function()
+  return open_telescope_floaterminal_picker()
+end, { desc = '[S]earch Float[T]erminal' })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
