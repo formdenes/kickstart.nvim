@@ -433,7 +433,9 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
-      vim.keymap.set('n', '<leader>ss', builtin.git_status, { desc = '[S]earch Git[S]tatus' })
+      vim.keymap.set('n', '<leader>si', function()
+        builtin.find_files { no_ignore = true, hidden = true }
+      end, { desc = '[S]earch [I]gnoredfiles' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
@@ -1010,6 +1012,7 @@ require('lazy').setup({
         'typescript',
         'javascript',
         'json',
+        'yaml',
       },
       -- Autoinstall languages that are not installed
       auto_install = true,
