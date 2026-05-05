@@ -28,7 +28,7 @@ local function git_status_select_current()
     relpath = bufpath:sub(#root + 1)
   end
   -- Get git status output (same order telescope will show)
-  local status_files, ret2 = utils.get_os_command_output({ 'git', 'status', '-s', '--porcelain=v1' }, git_root[1])
+  local status_files, ret2 = utils.get_os_command_output({ 'git', 'status', '-s', '-uall', '--porcelain=v1' }, git_root[1])
   local idx = nil
   if ret2 == 0 then
     for i, line in ipairs(status_files) do
