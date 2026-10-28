@@ -52,4 +52,67 @@ end
 
 vim.keymap.set('n', '<leader>ss', git_status_select_current, { desc = '[S]earch Git[S]tatus' })
 
+local group = vim.api.nvim_create_augroup('OoO', {})
+
+local diagnostic_float
+local suppress_diagnostics = false
+
+local function au(typ, pattern, cmdOrFn)
+  if type(cmdOrFn) == 'function' then
+    vim.api.nvim_create_autocmd(typ, {
+      pattern = pattern,
+      callback = cmdOrFn,
+      group = group,
+    })
+  else
+    vim.api.nvim_create_autocmd(typ, {
+      pattern = pattern,
+      command = cmdOrFn,
+      group = group,
+    })
+  end
+end
+
+local function close_diagnostic_float()
+  if diagnostic_float and vim.api.nvim_win_is_valid(diagnostic_float) then
+    vim.api.nvim_win_close(diagnostic_float, true)
+  end
+
+  diagnostic_float = nil
+end
+
+au({ 'CursorHold', 'InsertLeave' }, nil, function()
+  if suppress_diagnostics then
+    return
+  end
+
+  close_diagnostic_float()
+
+  diagnostic_float = vim.diagnostic.open_float(nil, {
+    focusable = false,
+    scope = 'cursor',
+    close_events = { 'BufLeave', 'CursorMoved', 'InsertEnter' },
+  })
+end)
+
+au('CursorMoved', nil, function()
+  suppress_diagnostics = false
+end)
+
+au('InsertEnter', nil, function()
+  vim.diagnostic.enable(false)
+end)
+
+au('InsertLeave', nil, function()
+  vim.diagnostic.enable(true)
+end)
+
+vim.keymap.set('n', 'K', function()
+  close_diagnostic_float()
+
+  suppress_diagnostics = true
+
+  vim.lsp.buf.hover()
+end)
+
 return {}
